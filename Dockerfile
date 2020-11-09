@@ -1,6 +1,6 @@
 FROM python:3.8-slim
 
-#Create folder for storing everything and install certs
+#Create folder for storing everything
 RUN mkdir -m 0700 /app
 
 #Copy script and requirements in
