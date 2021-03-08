@@ -22,6 +22,12 @@ def get_host_ip(url):
 
 def error_state(url, error_msg):
     '''Email failure to the webmins'''
+    if len(mj_api) > 1:
+        mailjet_email(url, error_msg)
+
+
+def mailjet_email(url, error_msg):
+    '''Utilize mailjet to email failure to the webmins'''
     mailjet = Client(auth=(mj_api, mj_secret))
     data = {
         'Messages': [
@@ -45,6 +51,7 @@ def error_state(url, error_msg):
     result = mailjet.send.create(data=data)
     print(result.status_code)
     print(result.json())
+
 
 def check_ports(url, *argv):
     '''Go through the ports to check if they are open
