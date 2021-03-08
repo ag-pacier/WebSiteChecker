@@ -6,7 +6,10 @@ Get the docker latest docker image by running
 ```
 docker pull dietolead/websitechecker:latest
 ```
-Grab your API keys for Mailjet by logging into your Mailjet account, clicking on your profile on the top right, then clicking Account Settings.
+Grab your API keys:
+
+### For Mailjet:
+Log into your Mailjet account, clicking on your profile on the top right, then clicking Account Settings.
 Under REST API, click on Master API Key & Sub API key management.
 Leave the window up so you can appropriate populate your ENV file.
 
@@ -18,10 +21,13 @@ MJ_APIKEY_PRIVATE=<Secret Key from Mailjet>
 WEB_ADMIN_EMAILS=<email addresses of folks who need to know if something is wrong separated by ;>
 WEBSITE_PORTS=<ports that should be open>
 ```
+### For AWS:
+
+PENDING
 
 Save the ENV file then run the container:
 ```
 docker run --env-file <location>.env -d dietolead/websitechecker:latest
 ```
 
-The container will check all ports you list, the certificate tied to the website and the home page to see if it comes up every 60 seconds. If it encounters an error, it will e-mail the WEB_ADMIN_EMAILS every 30 seconds with the details of what it finds until resolved (or until Mailjet cuts you off).
+The container will check all ports you list, the certificate tied to the website and the home page to see if it comes up every 60 seconds. If it encounters an error, it will e-mail the WEB_ADMIN_EMAILS every 30 seconds with the details of what it finds until resolved.
