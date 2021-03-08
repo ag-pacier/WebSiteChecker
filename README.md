@@ -24,6 +24,15 @@ WEBSITE_PORTS=<ports that should be open>
 ### For AWS:
 
 PENDING
+In a folder of your choosing, create an ENV file and populate it based on the sample ENV
+```
+WEBSITE_ADDRESS=<website you want to monitor>
+AWS_ACCESS_KEY_ID=<API Key for e-mail access in AWS>
+AWS_SECRET_ACCESS_KEY=<API password for e-mail access in AWS>
+AWS_REGION=<region to e-mail from>
+WEB_ADMIN_EMAILS=<email addresses of folks who need to know if something is wrong separated by ;>
+WEBSITE_PORTS=<ports that should be open>
+```
 
 Save the ENV file then run the container:
 ```
