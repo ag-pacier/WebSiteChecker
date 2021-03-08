@@ -6,13 +6,18 @@ from socket import socket, AF_INET, SOCK_STREAM
 from requests import head
 from time import sleep
 from mailjet_rest import Client
-import OpenSSL, ssl, dns.resolver
+from botocore.exceptions import ClientError
+import OpenSSL, ssl, dns.resolver, boto3
 
 website = str(getenv("WEBSITE_ADDRESS", default='massport.com'))
 mj_api = str(getenv("MJ_APIKEY_PUBLIC"))
 mj_secret = str(getenv("MJ_APIKEY_PRIVATE"))
+aws_api = str(getenv("AWS_ACCESS_KEY_ID"))
+aws_secret = str(getenv("AWS_SECRET_ACCESS_KEY"))
+aws_region = str(getenv("AWS_REGION"))
 webmins = str(getenv("WEB_ADMIN_EMAILS"))
 web_ports = getenv("WEBSITE_PORTS", default=443)
+
 
 def get_host_ip(url):
     '''Take URL and get its IP using DNSPYTHON.
@@ -20,10 +25,59 @@ def get_host_ip(url):
     result = dns.resolver.resolve(url, 'A')
     return str(result[0])
 
+
 def error_state(url, error_msg):
-    '''Email failure to the webmins'''
+    '''Email failure to the webmins
+        Tries Mailjet then AWS'''
     if len(mj_api) > 1:
         mailjet_email(url, error_msg)
+    elif len(aws_api) > 1:
+        aws_email(url, error_msg)
+
+
+def aws_email(url, error_msg):
+    '''Utilize AWS to email failure to the webmins'''
+    sender= f"Webmonitor <webmonitor@{url}>"
+    subject = f'Error on {url}'
+    body_txt = f'An error has occurred for {url} which is returned as {error_msg}'
+    body_html = f'<p>An error has occurred for {url} with the following message:</p>{error_msg}'
+    char_set = 'UTF-8'
+
+    # Create a new SES resource and specify a region.
+    client = boto3.client('ses', region_name=aws_region)
+
+    try:
+        response = client.send_email(
+            Destination={
+                'ToAddresses': [
+                    webmins,
+                ],
+            },
+            Message={
+                'Body': {
+                    'Html': {
+                        'Charset': char_set,
+                        'Data': body_html,
+                    },
+                    'Text': {
+                        'Charset': char_set,
+                        'Data': body_txt,
+                    },
+                },
+                'Subject': {
+                    'Charset': char_set,
+                    'Data': subject,
+                },
+            },
+            Source=sender,
+        )
+
+    # Display an error if something goes wrong.
+    except ClientError as e:
+        print(e.response['Error']['Message'])
+    else:
+        print("Email sent! Message ID:"),
+        print(response['MessageId'])
 
 
 def mailjet_email(url, error_msg):
