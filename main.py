@@ -33,6 +33,8 @@ def error_state(url, error_msg):
         mailjet_email(url, error_msg)
     elif len(aws_api) > 1:
         aws_email(url, error_msg)
+    else:
+        raise "No api keys present! Unable to send e-mail."
 
 
 def aws_email(url, error_msg):
