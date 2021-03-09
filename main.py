@@ -39,7 +39,7 @@ def error_state(url, error_msg):
 
 def aws_email(url, error_msg):
     '''Utilize AWS to email failure to the webmins'''
-    sender= f"Webmonitor <webmonitor@{url}>"
+    sender= f"Webmonitor <webmonitor@technicallythoughts.com>"
     subject = f'Error on {url}'
     body_txt = f'An error has occurred for {url} which is returned as {error_msg}'
     body_html = f'<p>An error has occurred for {url} with the following message:</p>{error_msg}'
