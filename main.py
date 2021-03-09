@@ -41,7 +41,7 @@ def aws_email(url, error_msg):
     '''Utilize AWS to email failure to the webmins'''
     sender= f"Webmonitor <webmonitor@technicallythoughts.com>"
     subject = f'Error on {url}'
-    body_txt = f'An error has occurred for {url} which is returned as {error_msg}'
+    body_txt = f'An error has occurred for {url} which is returned with: {error_msg}'
     body_html = f'<p>An error has occurred for {url} with the following message:</p>{error_msg}'
     char_set = 'UTF-8'
 
@@ -166,28 +166,34 @@ def check_cert(url):
 def main():
     while True:
         err = False
+        error_dict = {}
         site_ip = get_host_ip(website)
         failures = check_ports(site_ip, web_ports)
         #If there are any failures, call it
         if (len(failures) > 0):
-            error_state(website, f"Ports down: {failures}")
+            #error_state(website, f"Ports down: {failures}")
+            error_dict["Down Ports"] = failures
             err = True
         status = get_status(website)
         #If the status isn't a number, something went crazy
         try:
             status = int(status)
         except ValueError:
-            error_state(website, f"Status came back not okay: {status}")
+            #error_state(website, f"Status came back not okay: {status}")
+            error_dict["Bad Status"] = status
             err = True
         #If the status is 400 or over, it needs to be looked at
         if (status >= 400):
-            error_state(website, f"Website returned a status of: {status}")
+            #error_state(website, f"Website returned a status of: {status}")
+            error_dict["Status"] = status
             err = True
         if (check_cert(website)):
+            error_dict["Certificate Status"] = "Expired"
             err = True
         #If the error state tripped, sleep 30 and try again
         #Otherwise check again in 60 seconds
         if (err):
+            error_state(website, error_dict)
             sleep(30)
         else:
             sleep(60)
