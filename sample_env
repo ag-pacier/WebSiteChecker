@@ -6,3 +6,4 @@ AWS_SECRET_ACCESS_KEY=asdkdkdkdfnfnnf
 AWS_REGION=a;lkdjwkjer
 WEB_ADMIN_EMAILS=you@null.com
 WEBSITE_PORTS=443
+DEBUG=true

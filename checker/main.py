@@ -7,7 +7,7 @@ from requests import head
 from time import sleep
 from mailjet_rest import Client
 from botocore.exceptions import ClientError
-import OpenSSL, ssl, dns.resolver, boto3
+import OpenSSL, ssl, dns.resolver, boto3, logging
 
 website = str(getenv("WEBSITE_ADDRESS", default='massport.com'))
 mj_api = str(getenv("MJ_APIKEY_PUBLIC"))
@@ -18,6 +18,13 @@ aws_region = str(getenv("AWS_REGION"))
 webmins = str(getenv("WEB_ADMIN_EMAILS"))
 web_ports = getenv("WEBSITE_PORTS", default=443)
 
+#Logging setup
+if str(getenv("DEBUG")).upper() == "TRUE":
+    log_location = r'/log/debug.log'
+else:
+    log_location = r'/dev/null'
+
+logger = logging.getLogger('WebSiteChecker')
 
 def get_host_ip(url):
     '''Take URL and get its IP using DNSPYTHON.
