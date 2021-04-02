@@ -23,7 +23,6 @@ WEBSITE_PORTS=<ports that should be open>
 ```
 ### For AWS:
 
-PENDING
 In a folder of your choosing, create an ENV file and populate it based on the sample ENV
 ```
 WEBSITE_ADDRESS=<website you want to monitor>
@@ -40,3 +39,33 @@ docker run --env-file <location>.env -d dietolead/websitechecker:latest
 ```
 
 The container will check all ports you list, the certificate tied to the website and the home page to see if it comes up every 60 seconds. If it encounters an error, it will e-mail the WEB_ADMIN_EMAILS every 30 seconds with the details of what it finds until resolved.
+
+## Logging
+Logging has been refined to now use the logging package instead of print statements.
+
+By default, the level is set to INFO which will provide you with basic feedback on what's going on. If you add the following to your ENV file:
+```
+DEBUG=true
+```
+then verbose, debug logging will be enabled and be put out to the file /log/debug.log for which you will need to make a bindmount. So your new run command would be:
+```
+docker run --env-file <location>.env -v <location you want your log>:/log -d dietolead/websitechecker:latest
+```
+
+### Notes regarding logging
+Uninclusive valid debug options recognized in Python:
+```
+DEBUG=TRUE
+DEBUG=true
+DEBUG=tRuE
+DEBUG=tRUE
+DEBUG=True
+```
+uninclusive invalid debug options:
+```
+DEBUG=false
+DEBUG='true'
+DEBUG="True"
+```
+
+Although passwords are not saved in the log, the API keys are so please keep those logs secure. Additionally, debug logging adds a line for just about every function so please do not run it in production as it will fill up rapidly.
