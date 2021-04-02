@@ -45,7 +45,12 @@ logger.addHandler(ch)
 def get_host_ip(url):
     '''Take URL and get its IP using DNSPYTHON.
         Returns IP as STR'''
-    result = dns.resolver.resolve(url, 'A')
+    try:
+        result = dns.resolver.resolve(url, 'A')
+    except Exception as e:
+        logger.critical(e)
+    logger.debug(f'get_host_ip pulled {result}')
+    logger.debug(f'Will return {result[0]} as a string')
     return str(result[0])
 
 
@@ -53,10 +58,15 @@ def error_state(url, error_msg):
     '''Email failure to the webmins
         Tries Mailjet then AWS'''
     if len(mj_api) > 1:
+        logger.debug(f'Mailjet API picked as length is {len(mj_api)}')
         mailjet_email(url, error_msg)
     elif len(aws_api) > 1:
+        logger.debug(f'Mailjet API skipped as length is {len(mj_api)} and AWS API is {len(aws_api)}')
         aws_email(url, error_msg)
     else:
+        logger.error('Both APIs are under 1 char.')
+        logger.debug(f'Mailjet: {mj_api}')
+        logger.debug(f'AWS: {aws_api}')
         raise ValueError("No api keys present! Unable to send e-mail.")
 
 
@@ -99,15 +109,18 @@ def aws_email(url, error_msg):
 
     # Display an error if something goes wrong.
     except ClientError as e:
-        print(e.response['Error']['Message'])
+        logger.critical(e.response['Error']['Message'])
     else:
-        print("Email sent! Message ID:"),
-        print(response['MessageId'])
+        logger.info("Email sent! Message ID:"),
+        logger.info(response['MessageId'])
 
 
 def mailjet_email(url, error_msg):
     '''Utilize mailjet to email failure to the webmins'''
-    mailjet = Client(auth=(mj_api, mj_secret))
+    try:
+        mailjet = Client(auth=(mj_api, mj_secret))
+    except Exception as e:
+        logger.critical(e)
     data = {
         'Messages': [
             {
@@ -127,9 +140,12 @@ def mailjet_email(url, error_msg):
             }
         ]
     }
-    result = mailjet.send.create(data=data)
-    print(result.status_code)
-    print(result.json())
+    try:
+        result = mailjet.send.create(data=data)
+    except Exception as e:
+        logger.critical(e)
+    logger.info(f'Mailjet returned a code of: {result.status_code}')
+    logger.debug(result.json())
 
 
 def check_ports(url, *argv):
@@ -141,9 +157,12 @@ def check_ports(url, *argv):
     for arg in argv:
         try:
             int(arg)
+            logger.debug(f'Added {arg} to list of monitored ports')
         except ValueError:
+            logger.error(f'Cannot add {arg} to ports list, skipping.')
             continue
         ports.append(arg)
+        logger.debug(f'Ports being monitored: {ports}')
     #Go through each port
     #If they don't respond in 5 seconds, they are considered closed
     for port in ports:
@@ -153,12 +172,13 @@ def check_ports(url, *argv):
         result_of_check = a_socket.connect_ex(location)
 
         if result_of_check == 0:
-            print(f"{port} is open")
+            logger.info(f"{port} is open")
         else:
-            print(f"{port} is not open")
+            logger.warn(f"{port} is not open")
             failed.append(port)
 
         a_socket.close()
+    logger.debug(f'Returning list of failed ports as: {failed}')
     return failed
 
 
@@ -168,8 +188,9 @@ def get_status(url):
     #If we forgot HTTPS or HTTP for the schema, add it
     if (url.startswith('http') == False):
         url = "https://" + url
+    logger.debug(f'get_status using {url}')
     request_response = head(url)
-    print(f"Status code returned: {request_response.status_code}")
+    logger.info(f"Status code returned: {request_response.status_code}")
     return request_response.status_code
 
 
@@ -182,7 +203,7 @@ def check_cert(url):
     cert = ssl.get_server_certificate((url, 443))
     #Load it so we can check it
     x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
-    print(f"Cert is expired: {x509.has_expired()}")
+    logger.info(f"Cert is expired: {x509.has_expired()}")
     return x509.has_expired()
 
 
@@ -190,11 +211,11 @@ def main():
     while True:
         err = False
         error_dict = {}
+        logger.debug('Cleared error status for new checks.')
         site_ip = get_host_ip(website)
         failures = check_ports(site_ip, web_ports)
         #If there are any failures, call it
         if (len(failures) > 0):
-            #error_state(website, f"Ports down: {failures}")
             error_dict["Down Ports"] = failures
             err = True
         status = get_status(website)
@@ -202,24 +223,34 @@ def main():
         try:
             status = int(status)
         except ValueError:
-            #error_state(website, f"Status came back not okay: {status}")
+            logger.warn("Status returned a non-int!")
             error_dict["Bad Status"] = status
             err = True
         #If the status is 400 or over, it needs to be looked at
         if (status >= 400):
-            #error_state(website, f"Website returned a status of: {status}")
+            logger.warn("Status is 400 or over, indicating an issue!")
             error_dict["Status"] = status
             err = True
         if (check_cert(website)):
+            logger.warn("Certificate is expired!")
             error_dict["Certificate Status"] = "Expired"
             err = True
         #If the error state tripped, sleep 30 and try again
         #Otherwise check again in 60 seconds
         if (err):
+            logger.debug(f'Error state tripped with: {error_dict}')
             error_state(website, error_dict)
             sleep(30)
         else:
+            logger.debug('Error state not tripped, sleeping for 60 seconds.')
             sleep(60)
 
 if __name__ == "__main__":
+    logger.debug('Webchecker starting. Logging captured settings.')
+    logger.debug(f'Website: {website}')
+    logger.debug(f'APIs: {mj_api} :: {aws_api}')
+    if aws_region > 0:
+        logger.debug(f'AWS Region: {aws_region}')
+    logger.debug(f'Admin emails: {webmins}')
+    logger.debug(f'Ports supplied: {web_ports}')
     main()
