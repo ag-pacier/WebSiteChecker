@@ -1,7 +1,7 @@
 #! python3
 # Monitor a given website to make sure everything is kosher
 
-from os import getenv
+from os import getenv, devnull
 from socket import socket, AF_INET, SOCK_STREAM
 from requests import head
 from time import sleep
@@ -19,12 +19,28 @@ webmins = str(getenv("WEB_ADMIN_EMAILS"))
 web_ports = getenv("WEBSITE_PORTS", default=443)
 
 #Logging setup
+logger = logging.getLogger('WebSiteChecker')
 if str(getenv("DEBUG")).upper() == "TRUE":
     log_location = r'/log/debug.log'
+    logger.setLevel(logging.DEBUG)
 else:
-    log_location = r'/dev/null'
+    #Use os.devnull to send to null device
+    log_location = devnull
+    logger.setLevel(logging.WARNING)
 
-logger = logging.getLogger('WebSiteChecker')
+file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+stream_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+fh = logging.FileHandler(log_location, mode='a')
+fh.setLevel(logging.DEBUG)
+fh.setFormatter(file_format)
+logger.addHandler(fh)
+
+ch = logging.StreamHandler()
+ch.setLevel(logging.WARNING)
+ch.setFormatter(stream_format)
+logger.addHandler(ch)
+
 
 def get_host_ip(url):
     '''Take URL and get its IP using DNSPYTHON.
