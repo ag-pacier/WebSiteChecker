@@ -6,9 +6,18 @@ Get the docker latest docker image by running
 ```
 docker pull dietolead/websitechecker:latest
 ```
-Grab your API keys:
 
-### For Mailjet:
+When filling out your ports monitors, add the entry like so in the ENV:
+
+```
+WEBSITE_PORTS=80,443,8080
+```
+
+If ports are being missed, turn on debug logging and check the log.
+
+## Get your API Keys
+
+For Mailjet:
 Log into your Mailjet account, clicking on your profile on the top right, then clicking Account Settings.
 Under REST API, click on Master API Key & Sub API key management.
 Leave the window up so you can appropriate populate your ENV file.
@@ -21,7 +30,8 @@ MJ_APIKEY_PRIVATE=<Secret Key from Mailjet>
 WEB_ADMIN_EMAILS=<email addresses of folks who need to know if something is wrong separated by ;>
 WEBSITE_PORTS=<ports that should be open>
 ```
-### For AWS:
+
+For AWS:
 
 Login to your AWS console as an administrative user. Create a user with full access to the SES API and no console access. Generate Access Keys and save the CSV in a secure location.
 
