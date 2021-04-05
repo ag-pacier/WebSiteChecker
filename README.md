@@ -67,19 +67,11 @@ docker run --env-file <location>.env -v <location you want your log>:/log -d die
 ```
 
 ### Notes regarding logging
-Uninclusive valid debug options recognized in Python:
-```
-DEBUG=TRUE
-DEBUG=true
-DEBUG=tRuE
-DEBUG=tRUE
-DEBUG=True
-```
-uninclusive invalid debug options:
-```
-DEBUG=false
-DEBUG='true'
-DEBUG="True"
-```
+Logging as 3 levels:
 
-Although passwords are not saved in the log, the API keys are so please keep those logs secure. Additionally, debug logging adds a line for just about every function so please do not run it in production as it will fill up rapidly.
+- DEBUG=TRUE
+    - This turns on debug logging to get everything the container looks at. Will help you trouble shoot misconfigs and software bugs
+- DEBUG=FALSE
+    - This causes WARNING, ERROR and CRITICAL messages to go to the container STOUT and everything else to disappear. (Recommended for casual production runs)
+- DEBUG UNDEFINED OR MISCONFIGURED
+    - If DEBUG is set to an invalid entry or is missing from the ENV file, logging is set to INFO, WARNING, ERROR and CRITICAL to go to STOUT and the log file. If a volume or bindmount is not set for /log, the log file will be lost when the container is removed. This option is recommended for production builds that need logging.
