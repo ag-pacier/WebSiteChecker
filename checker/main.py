@@ -162,7 +162,7 @@ def check_ports(url, *argv):
         except ValueError:
             logger.error(f'Cannot add {arg} to ports list, skipping.')
             continue
-        ports.append(arg)
+        ports.append(int(arg))
         logger.debug(f'Ports being monitored: {ports}')
     #Go through each port
     #If they don't respond in 5 seconds, they are considered closed
@@ -174,7 +174,7 @@ def check_ports(url, *argv):
         try:
             result_of_check = a_socket.connect_ex(location)
         except TypeError as e:
-            logger.debug(f'Location types: {type(location)} :: {type(location[0])} :: {type(location[1])}')
+            logger.debug(f'Location types: {type(location)} :: URL: {type(location[0])} :: port: {type(location[1])}')
             logger.critical(e)
 
         if result_of_check == 0:
