@@ -4,7 +4,7 @@ Docker container and Python script to check a website for open ports, a valid ce
 ## Usage
 Get the docker latest docker image by running
 ```
-docker pull dietolead/websitechecker:latest
+docker pull dietolead/websitechecker:2.0
 ```
 
 When filling out your ports monitors, add the entry like so in the ENV:
@@ -49,7 +49,7 @@ WEBSITE_PORTS=<ports that should be open>
 
 Save the ENV file then run the container:
 ```
-docker run --env-file <location>.env -d dietolead/websitechecker:latest
+docker run --env-file <location>.env -d dietolead/websitechecker:2.0
 ```
 
 The container will check all ports you list, the certificate tied to the website and the home page to see if it comes up every 60 seconds. If it encounters an error, it will e-mail the WEB_ADMIN_EMAILS every 30 seconds with the details of what it finds until resolved.
@@ -63,7 +63,7 @@ DEBUG=true
 ```
 then verbose, debug logging will be enabled and be put out to the file /log/debug.log for which you will need to make a bindmount. So your new run command would be:
 ```
-docker run --env-file <location>.env -v <location you want your log>:/log -d dietolead/websitechecker:latest
+docker run --env-file <location>.env -v <location you want your log>:/log -d dietolead/websitechecker:2.0
 ```
 
 ### Notes regarding logging
