@@ -45,12 +45,13 @@ logger.addHandler(ch)
 def get_host_ip(url):
     '''Take URL and get its IP using DNSPYTHON.
         Returns IP as STR'''
+    svr_info = dns.resolver.Resolver()
     try:
         result = dns.resolver.resolve(url, 'A')
     except Exception as e:
+        logger.debug(f'DNS Server used: {svr_info.nameservers}')
         logger.critical(e)
-    logger.debug(f'get_host_ip pulled {result}')
-    logger.debug(f'Will return {result[0]} as a string')
+    logger.debug(f'get_host_ip pulled {result[0]} from {svr_info.nameservers}')
     return str(result[0])
 
 
@@ -249,7 +250,7 @@ if __name__ == "__main__":
     logger.debug('Webchecker starting. Logging captured settings.')
     logger.debug(f'Website: {website}')
     logger.debug(f'APIs: {mj_api} :: {aws_api}')
-    if aws_region > 0:
+    if len(aws_region) > 0:
         logger.debug(f'AWS Region: {aws_region}')
     logger.debug(f'Admin emails: {webmins}')
     logger.debug(f'Ports supplied: {web_ports}')
