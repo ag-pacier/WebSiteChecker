@@ -170,7 +170,12 @@ def check_ports(url, *argv):
         a_socket = socket(AF_INET, SOCK_STREAM)
         a_socket.settimeout(5)
         location = (url, port)
-        result_of_check = a_socket.connect_ex(location)
+        logger.debug(f'Location set to: {location}')
+        try:
+            result_of_check = a_socket.connect_ex(location)
+        except TypeError as e:
+            logger.debug(f'Location types: {type(location)} :: {type(location[0])} :: {type(location[1])}')
+            logger.critical(e)
 
         if result_of_check == 0:
             logger.info(f"{port} is open")
