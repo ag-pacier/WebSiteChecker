@@ -1,7 +1,8 @@
 FROM python:3.8-slim
 
-#Create folder for storing everything
-RUN mkdir -m 0700 /app
+#Create folder for storing script and requirements
+#Then create folder for logging
+RUN mkdir -m 0700 /app && mkdir -m 0704 /log
 
 #Copy script and requirements in
 COPY [ "./requirements.txt", "./checker/main.py", "/app/" ]
