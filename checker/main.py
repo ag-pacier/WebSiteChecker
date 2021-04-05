@@ -24,10 +24,13 @@ logger = logging.getLogger('WebSiteChecker')
 if str(getenv("DEBUG")).upper() == "TRUE":
     log_location = r'/log/debug.log'
     logger.setLevel(logging.DEBUG)
-else:
+elif str(getenv("DEBUG")).upper() == "FALSE":
     #Use os.devnull to send to null device
     log_location = devnull
     logger.setLevel(logging.WARNING)
+else:
+    log_location = r'/log/debug.log'
+    logger.setLevel(logging.INFO)
 
 file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 stream_format = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
@@ -262,7 +265,7 @@ if __name__ == "__main__":
     logger.debug('Webchecker starting. Logging captured settings.')
     logger.debug(f'Website: {website}')
     logger.debug(f'APIs: {mj_api} :: {aws_api}')
-    if len(aws_region) > 0:
+    if len(aws_region) > 4:
         logger.debug(f'AWS Region: {aws_region}')
     logger.debug(f'Admin emails: {webmins}')
     logger.debug(f'Ports supplied: {web_ports}')
