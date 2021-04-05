@@ -16,7 +16,7 @@ aws_api = str(getenv("AWS_ACCESS_KEY_ID"))
 aws_secret = str(getenv("AWS_SECRET_ACCESS_KEY"))
 aws_region = str(getenv("AWS_REGION"))
 webmins = str(getenv("WEB_ADMIN_EMAILS"))
-web_ports = getenv("WEBSITE_PORTS", default=443)
+web_ports = str(getenv("WEBSITE_PORTS", default=443)).split(',')
 
 #Logging setup
 logger = logging.getLogger('WebSiteChecker')
@@ -58,11 +58,11 @@ def get_host_ip(url):
 def error_state(url, error_msg):
     '''Email failure to the webmins
         Tries Mailjet then AWS'''
-    if len(mj_api) > 1:
+    if len(mj_api) > 4:
         logger.debug(f'Mailjet API picked as length is {len(mj_api)}')
         mailjet_email(url, error_msg)
-    elif len(aws_api) > 1:
-        logger.debug(f'Mailjet API skipped as length is {len(mj_api)} and AWS API is {len(aws_api)}')
+    elif len(aws_api) > 4:
+        logger.debug(f'Mailjet API skipped as length is {mj_api} and AWS API is {len(aws_api)}')
         aws_email(url, error_msg)
     else:
         logger.error('Both APIs are under 1 char.')
@@ -149,13 +149,13 @@ def mailjet_email(url, error_msg):
     logger.debug(result.json())
 
 
-def check_ports(url, *argv):
+def check_ports(url, webports):
     '''Go through the ports to check if they are open
         Returns a list of closed ports'''
     failed = []
     ports = []
     #Purge any args that can't be ints
-    for arg in argv:
+    for arg in webports:
         try:
             int(arg)
             logger.debug(f'Added {arg} to list of monitored ports')
@@ -180,7 +180,7 @@ def check_ports(url, *argv):
         if result_of_check == 0:
             logger.info(f"{port} is open")
         else:
-            logger.warn(f"{port} is not open")
+            logger.warning(f"{port} is not open")
             failed.append(port)
 
         a_socket.close()
@@ -229,16 +229,16 @@ def main():
         try:
             status = int(status)
         except ValueError:
-            logger.warn("Status returned a non-int!")
+            logger.warning("Status returned a non-int!")
             error_dict["Bad Status"] = status
             err = True
         #If the status is 400 or over, it needs to be looked at
         if (status >= 400):
-            logger.warn("Status is 400 or over, indicating an issue!")
+            logger.warning("Status is 400 or over, indicating an issue!")
             error_dict["Status"] = status
             err = True
         if (check_cert(website)):
-            logger.warn("Certificate is expired!")
+            logger.warning("Certificate is expired!")
             error_dict["Certificate Status"] = "Expired"
             err = True
         #If the error state tripped, sleep 30 and try again
