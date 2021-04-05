@@ -2,7 +2,7 @@
 # Monitor a given website to make sure everything is kosher
 
 from os import getenv, devnull
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_STREAM, error
 from requests import head
 from time import sleep
 from mailjet_rest import Client
@@ -111,6 +111,8 @@ def aws_email(url, error_msg):
     # Display an error if something goes wrong.
     except ClientError as e:
         logger.critical(e.response['Error']['Message'])
+    except Exception as e:
+        logger.critical(e)
     else:
         logger.info("Email sent! Message ID:"),
         logger.info(response['MessageId'])
@@ -176,6 +178,10 @@ def check_ports(url, webports):
         except TypeError as e:
             logger.debug(f'Location types: {type(location)} :: URL: {type(location[0])} :: port: {type(location[1])}')
             logger.critical(e)
+        except TimeoutError as e:
+            logger.debug(f'Socket returned: {e}')
+            continue
+
 
         if result_of_check == 0:
             logger.info(f"{port} is open")
