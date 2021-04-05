@@ -23,11 +23,15 @@ WEBSITE_PORTS=<ports that should be open>
 ```
 ### For AWS:
 
+Login to your AWS console as an administrative user. Create a user with full access to the SES API and no console access. Generate Access Keys and save the CSV in a secure location.
+
+Ensure your domain is added and verified in the SES console. Configure to be able to send email to your addresses that will be listed in the WEB_ADMIN_EMAILS entry in the ENV file you will create. If sending outside your domain, ensure you are not in the sandbox mode in SES before beginning monitoring.
+
 In a folder of your choosing, create an ENV file and populate it based on the sample ENV
 ```
 WEBSITE_ADDRESS=<website you want to monitor>
-AWS_ACCESS_KEY_ID=<API Key for e-mail access in AWS>
-AWS_SECRET_ACCESS_KEY=<API password for e-mail access in AWS>
+AWS_ACCESS_KEY_ID=<first entry in saved CSV>
+AWS_SECRET_ACCESS_KEY=<Second entry in saved CSV>
 AWS_REGION=<region to e-mail from>
 WEB_ADMIN_EMAILS=<email addresses of folks who need to know if something is wrong separated by ;>
 WEBSITE_PORTS=<ports that should be open>
