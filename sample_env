@@ -1,4 +1,5 @@
 WEBSITE_ADDRESS=www.google.com
+EMAIL_DOMAIN=your-owned-domain.yours
 MJ_APIKEY_PUBLIC=65asd4f6a5s4d6f
 MJ_APIKEY_PRIVATE=as32d1f8asd9f15
 AWS_ACCESS_KEY_ID=a234234kjkljdlskafd

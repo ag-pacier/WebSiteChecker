@@ -16,6 +16,7 @@ aws_api = str(getenv("AWS_ACCESS_KEY_ID"))
 aws_secret = str(getenv("AWS_SECRET_ACCESS_KEY"))
 aws_region = str(getenv("AWS_REGION"))
 webmins = str(getenv("WEB_ADMIN_EMAILS"))
+email_domain = str(getenv("EMAIL_DOMAIN"))
 web_ports = str(getenv("WEBSITE_PORTS", default=443)).split(',')
 
 #Logging setup
@@ -73,7 +74,7 @@ def error_state(url, error_msg):
 
 def aws_email(url, error_msg):
     '''Utilize AWS to email failure to the webmins'''
-    sender= f"Webmonitor <webmonitor@technicallythoughts.com>"
+    sender= f"Webmonitor <webmonitor@{email_domain}>"
     subject = f'Error on {url}'
     body_txt = f'An error has occurred for {url} which is returned with: {error_msg}'
     body_html = f'<p>An error has occurred for {url} with the following message:</p>{error_msg}'
@@ -128,7 +129,7 @@ def mailjet_email(url, error_msg):
         'Messages': [
             {
                 "From": {
-                    "Email": "webmonitor@technicallythoughts.com",
+                    "Email": f"webmonitor@{email_domain}",
                     "Name": "Webmonitor"
                 },
                 "To": [
