@@ -70,7 +70,7 @@ docker run --env-file <location>.env -v <location you want your log>:/log -d die
 Logging as 3 levels:
 
 - DEBUG=TRUE
-    - This turns on debug logging to get everything the container looks at. Will help you trouble shoot misconfigs and software bugs
+    - This turns on debug logging to get everything the container looks at. Will help you troubleshoot misconfigs and software bugs
 - DEBUG=FALSE
     - This causes WARNING, ERROR and CRITICAL messages to go to the container STOUT and everything else to disappear. (Recommended for casual production runs)
 - DEBUG UNDEFINED OR MISCONFIGURED
